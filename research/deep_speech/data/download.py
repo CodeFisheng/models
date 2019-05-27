@@ -38,16 +38,10 @@ LIBRI_SPEECH_URLS = {
         "http://www.openslr.org/resources/12/train-clean-100.tar.gz",
     "train-clean-360":
         "http://www.openslr.org/resources/12/train-clean-360.tar.gz",
-    "train-other-500":
-        "http://www.openslr.org/resources/12/train-other-500.tar.gz",
     "dev-clean":
         "http://www.openslr.org/resources/12/dev-clean.tar.gz",
-    "dev-other":
-        "http://www.openslr.org/resources/12/dev-other.tar.gz",
     "test-clean":
         "http://www.openslr.org/resources/12/test-clean.tar.gz",
-    "test-other":
-        "http://www.openslr.org/resources/12/test-other.tar.gz"
 }
 
 
@@ -174,7 +168,7 @@ def download_and_process_datasets(directory, datasets):
 def define_data_download_flags():
   """Define flags for data downloading."""
   absl_flags.DEFINE_string(
-      "data_dir", "/tmp/librispeech_data",
+      "data_dir", "./data_dir",
       "Directory to download data and extract the tarball")
   absl_flags.DEFINE_bool("train_only", False,
                          "If true, only download the training set")
@@ -191,11 +185,11 @@ def main(_):
   if FLAGS.train_only:
     download_and_process_datasets(
         FLAGS.data_dir,
-        ["train-clean-100", "train-clean-360", "train-other-500"])
+        ["train-clean-100", "train-clean-360"])
   elif FLAGS.dev_only:
-    download_and_process_datasets(FLAGS.data_dir, ["dev-clean", "dev-other"])
+    download_and_process_datasets(FLAGS.data_dir, ["dev-clean"])
   elif FLAGS.test_only:
-    download_and_process_datasets(FLAGS.data_dir, ["test-clean", "test-other"])
+    download_and_process_datasets(FLAGS.data_dir, ["test-clean"])
   else:
     # By default we download the entire dataset.
     download_and_process_datasets(FLAGS.data_dir, LIBRI_SPEECH_URLS.keys())

@@ -163,7 +163,7 @@ def model_fn(features, labels, mode, params):
 
   if mode == tf.estimator.ModeKeys.PREDICT:
     logits = model(features, training=False)
-    logits = tf.cast(logits, tf.bfloat16)
+    logits = tf.cast(logits, tf.float32)
     predictions = {
         "classes": tf.argmax(logits, axis=2),
         "probabilities": tf.nn.softmax(logits),
@@ -175,7 +175,7 @@ def model_fn(features, labels, mode, params):
 
   # In training mode.
   logits = model(features, training=True)
-  logits = tf.cast(logits, tf.bfloat16)
+  logits = tf.cast(logits, tf.float32)
   probs = tf.nn.softmax(logits)
   ctc_input_length = compute_length_after_conv(
       tf.shape(features)[1], tf.shape(probs)[1], input_length)

@@ -174,7 +174,7 @@ def model_fn(features, labels, mode, params):
         predictions=predictions)
 
   # In training mode.
-  logits = model(features, training=True, mpt=True)
+  logits = model(features, training=True)
   logits = tf.cast(logits, tf.bfloat16)
   probs = tf.nn.softmax(logits)
   ctc_input_length = compute_length_after_conv(

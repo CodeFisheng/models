@@ -59,7 +59,7 @@ def batch_norm(inputs, training):
 
 
 def _conv_bn_layer(inputs, padding, filters, kernel_size, strides, layer_id,
-                   training):
+                   training, dtype=tf.float32):
   """Defines 2D convolutional + batch normalization layer.
 
   Args:
@@ -78,18 +78,23 @@ def _conv_bn_layer(inputs, padding, filters, kernel_size, strides, layer_id,
   # Perform symmetric padding on the feature dimension of time_step
   # This step is required to avoid issues when RNN output sequence is shorter
   # than the label length.
+  inputs = tf.cast(inputs, tf.float32)
   inputs = tf.pad(
       inputs,
       [[0, 0], [padding[0], padding[0]], [padding[1], padding[1]], [0, 0]])
+  inputs = tf.cast(inputs, dtype)
+  # TODO
+  inputs = tf.cast(inputs, tf.float32)
   inputs = tf.layers.conv2d(
       inputs=inputs, filters=filters, kernel_size=kernel_size, strides=strides,
       padding="valid", use_bias=False, activation=tf.nn.relu6,
       name="cnn_{}".format(layer_id))
+  inputs = tf.cast(inputs, dtype)
   return batch_norm(inputs, training)
 
 
 def _rnn_layer(inputs, rnn_cell, rnn_hidden_size, layer_id, is_batch_norm,
-               is_bidirectional, training):
+               is_bidirectional, training, dtype=tf.float32):
   """Defines a batch normalization + rnn layer.
 
   Args:
@@ -106,8 +111,11 @@ def _rnn_layer(inputs, rnn_cell, rnn_hidden_size, layer_id, is_batch_norm,
   Returns:
     tensor output for the current layer.
   """
+  # TODO convert to fp32 for kernel
+  inputs = tf.cast(inputs, tf.float32)
   if is_batch_norm:
     inputs = batch_norm(inputs, training)
+  inputs = tf.cast(inputs, dtype)
 
   # Construct forward/backward RNN cells.
   fw_cell = rnn_cell(num_units=rnn_hidden_size,
@@ -115,6 +123,8 @@ def _rnn_layer(inputs, rnn_cell, rnn_hidden_size, layer_id, is_batch_norm,
   bw_cell = rnn_cell(num_units=rnn_hidden_size,
                      name="rnn_bw_{}".format(layer_id))
 
+  # TODO convert to fp32 for kernel
+  inputs = tf.cast(inputs, tf.float32)
   if is_bidirectional:
     outputs, _ = tf.nn.bidirectional_dynamic_rnn(
         cell_fw=fw_cell, cell_bw=bw_cell, inputs=inputs, dtype=tf.float32,
@@ -123,6 +133,7 @@ def _rnn_layer(inputs, rnn_cell, rnn_hidden_size, layer_id, is_batch_norm,
   else:
     rnn_outputs = tf.nn.dynamic_rnn(
         fw_cell, inputs, dtype=tf.float32, swap_memory=True)
+  rnn_outputs = tf.cast(rnn_outputs, dtype)
 
   return rnn_outputs
 
@@ -131,7 +142,7 @@ class DeepSpeech2(object):
   """Define DeepSpeech2 model."""
 
   def __init__(self, num_rnn_layers, rnn_type, is_bidirectional,
-               rnn_hidden_size, num_classes, use_bias):
+               rnn_hidden_size, num_classes, use_bias, dtype):
     """Initialize DeepSpeech2 model.
 
     Args:
@@ -148,25 +159,29 @@ class DeepSpeech2(object):
     self.rnn_hidden_size = rnn_hidden_size
     self.num_classes = num_classes
     self.use_bias = use_bias
+    self.dtype = dtype
 
   def __call__(self, inputs, training):
     # Two cnn layers.
+    inputs = tf.cast(inputs, self.dtype)
     inputs = _conv_bn_layer(
         inputs, padding=(20, 5), filters=_CONV_FILTERS, kernel_size=(41, 11),
-        strides=(2, 2), layer_id=1, training=training)
+        strides=(2, 2), layer_id=1, training=training, dtype=self.dtype)
 
     inputs = _conv_bn_layer(
         inputs, padding=(10, 5), filters=_CONV_FILTERS, kernel_size=(21, 11),
-        strides=(2, 1), layer_id=2, training=training)
+        strides=(2, 1), layer_id=2, training=training, dtype=self.dtype)
 
     # output of conv_layer2 with the shape of
     # [batch_size (N), times (T), features (F), channels (C)].
     # Convert the conv output to rnn input.
+    inputs = tf.cast(inputs, tf.float32)
     batch_size = tf.shape(inputs)[0]
     feat_size = inputs.get_shape().as_list()[2]
     inputs = tf.reshape(
         inputs,
         [batch_size, -1, feat_size * _CONV_FILTERS])
+    inputs = tf.cast(inputs, self.dtype)
 
     # RNN layers.
     rnn_cell = SUPPORTED_RNNS[self.rnn_type]
@@ -175,11 +190,16 @@ class DeepSpeech2(object):
       is_batch_norm = (layer_counter != 0)
       inputs = _rnn_layer(
           inputs, rnn_cell, self.rnn_hidden_size, layer_counter + 1,
-          is_batch_norm, self.is_bidirectional, training)
+          is_batch_norm, self.is_bidirectional, training, dtype=self.dtype)
 
     # FC layer with batch norm.
+    inputs = tf.cast(inputs, tf.float32)
     inputs = batch_norm(inputs, training)
+    inputs = tf.cast(inputs, self.dtype)
+
+    inputs = tf.cast(inputs, tf.float32)
     logits = tf.layers.dense(inputs, self.num_classes, use_bias=self.use_bias)
+    logits = tf.cast(logits, self.dtype)
 
     return logits
 

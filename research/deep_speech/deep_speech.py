@@ -159,7 +159,7 @@ def model_fn(features, labels, mode, params):
   model = deep_speech_model.DeepSpeech2(
       flags_obj.rnn_hidden_layers, flags_obj.rnn_type,
       flags_obj.is_bidirectional, flags_obj.rnn_hidden_size,
-      num_classes, flags_obj.use_bias)
+      num_classes, flags_obj.use_bias, tf.float32)
 
   if mode == tf.estimator.ModeKeys.PREDICT:
     logits = model(features, training=False)
@@ -318,10 +318,10 @@ def define_deep_speech_flags():
   flags.adopt_module_key_flags(flags_core)
 
   flags_core.set_defaults(
-      model_dir="/tmp/deep_speech_model/",
-      export_dir="/tmp/deep_speech_saved_model/",
+      model_dir="/data/deepspeech_test/models/research/deep_speech/fp32_model_dir/",
+      export_dir="/data/deepspeech_test/models/research/deep_speech/deep_speech_saved_model/",
       train_epochs=10,
-      batch_size=128,
+      batch_size=16,
       hooks="")
 
   # Deep speech flags

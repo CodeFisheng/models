@@ -321,7 +321,7 @@ def define_deep_speech_flags():
       model_dir="/data/deepspeech_test/models/research/deep_speech/fp32_model_dir/",
       export_dir="/data/deepspeech_test/models/research/deep_speech/deep_speech_saved_model/",
       train_epochs=10,
-      batch_size=16,
+      batch_size=8,
       hooks="")
 
   # Deep speech flags
@@ -367,11 +367,13 @@ def define_deep_speech_flags():
 
   # RNN related flags
   flags.DEFINE_integer(
-      name="rnn_hidden_size", default=800,
+      # TODO, changed to 2560
+      name="rnn_hidden_size", default=2560, #800,
       help=flags_core.help_wrap("The hidden size of RNNs."))
 
   flags.DEFINE_integer(
-      name="rnn_hidden_layers", default=5,
+      # TODO, changed to 3
+      name="rnn_hidden_layers", default=3, #5,
       help=flags_core.help_wrap("The number of RNN layers."))
 
   flags.DEFINE_bool(

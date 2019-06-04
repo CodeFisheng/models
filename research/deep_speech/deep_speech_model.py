@@ -164,12 +164,14 @@ class DeepSpeech2(object):
   def __call__(self, inputs, training):
     # Two cnn layers.
     inputs = tf.cast(inputs, self.dtype)
+    # TODO changed (20, 5) padding size to (0, 5)
     inputs = _conv_bn_layer(
-        inputs, padding=(20, 5), filters=_CONV_FILTERS, kernel_size=(41, 11),
+        inputs, padding=(0, 5), filters=_CONV_FILTERS, kernel_size=(41, 11),
         strides=(2, 2), layer_id=1, training=training, dtype=self.dtype)
 
+    # TODO changed (10, 5) padding size to (0, 5)
     inputs = _conv_bn_layer(
-        inputs, padding=(10, 5), filters=_CONV_FILTERS, kernel_size=(21, 11),
+        inputs, padding=(0, 5), filters=_CONV_FILTERS, kernel_size=(21, 11),
         strides=(2, 1), layer_id=2, training=training, dtype=self.dtype)
 
     # output of conv_layer2 with the shape of

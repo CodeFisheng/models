@@ -86,7 +86,7 @@ def _conv_bn_layer(inputs, padding, filters, kernel_size, strides, layer_id,
       inputs=inputs, filters=filters, kernel_size=kernel_size, strides=strides,
       padding="valid", use_bias=False, activation=tf.nn.relu6,
       name="cnn_{}".format(layer_id))
-  inputs = tf.cast(inputs, self.dtype)
+  inputs = tf.cast(inputs, dtype)
   inputs = tf.cast(inputs, tf.float32)
   return batch_norm(inputs, training)
 

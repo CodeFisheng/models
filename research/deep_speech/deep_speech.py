@@ -318,11 +318,21 @@ def define_deep_speech_flags():
   flags.adopt_module_key_flags(flags_core)
 
   flags_core.set_defaults(
-      model_dir="/data/deepspeech_test/models/research/deep_speech/fp32_model_dir/",
-      export_dir="/data/deepspeech_test/models/research/deep_speech/deep_speech_saved_model/",
+      model_dir="./model_dir_fp32/",
+      export_dir="./deep_speech_saved_model/",
       train_epochs=10,
-      batch_size=8,
+      batch_size=16,
       hooks="")
+
+  flags.DEFINE_string(
+      name="benchmark_logger_type",
+      default="BenchmarkFileLogger",
+      help=flags_core.help_wrap("where to export logging infos."))
+
+  flags.DEFINE_string(
+      name="benchmark_log_dir",
+      default="./official_logs_fp32/",
+      help=flags_core.help_wrap("where to export logging infos."))
 
   # Deep speech flags
   flags.DEFINE_integer(
@@ -331,17 +341,13 @@ def define_deep_speech_flags():
 
   flags.DEFINE_string(
       name="train_data_dir",
-      # default="/tmp/librispeech_data/test-clean/LibriSpeech/test-clean.csv",
-      default="/data/deepspeech_test/models/research/deep_speech/data_dir"
-              "/final_train_dataset.csv",
-      help=flags_core.help_wrap("The csv file path of train dataset."))
+      default="./librispeech_data/final_train_small_dataset.csv",
+      help=flags_core.help_wrap("The csv file path of train dataset, default is clean-100."))
 
   flags.DEFINE_string(
       name="eval_data_dir",
-      # default="/tmp/librispeech_data/test-clean/LibriSpeech/test-clean.csv",
-      default="/data/deepspeech_test/models/research/deep_speech/data_dir"
-              "/final_eval_dataset.csv",
-      help=flags_core.help_wrap("The csv file path of evaluation dataset."))
+      default="./librispeech_data/final_eval_small_dataset.csv",
+      help=flags_core.help_wrap("The csv file path of evaluation dataset, default is clean-100."))
 
   flags.DEFINE_bool(
       name="sortagrad", default=True,

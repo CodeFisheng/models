@@ -62,7 +62,7 @@ def download_and_extract(directory, url):
   if not tf.gfile.Exists(directory):
     tf.gfile.MakeDirs(directory)
 
-  _, tar_filepath = tempfile.mkstemp(suffix=".tar.gz")
+  _, tar_filepath = tempfile.mkstemp(dir="/data/tmp/", suffix=".tar.gz")
 
   try:
     tf.logging.info("Downloading %s to %s" % (url, tar_filepath))

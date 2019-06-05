@@ -120,7 +120,7 @@ def _rnn_layer(inputs, rnn_cell, rnn_hidden_size, layer_id, is_batch_norm,
   # Construct forward/backward RNN cells.
   fw_cell = rnn_cell(num_units=rnn_hidden_size,
                      name="rnn_fw_{}".format(layer_id))
-  if is_biderectional:
+  if is_bidirectional:
     bw_cell = rnn_cell(num_units=rnn_hidden_size,
                        name="rnn_bw_{}".format(layer_id))
 

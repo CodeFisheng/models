@@ -326,16 +326,6 @@ def define_deep_speech_flags():
       batch_size=16,
       hooks="")
 
-  flags.DEFINE_string(
-      name="benchmark_logger_type",
-      default="BenchmarkFileLogger",
-      help=flags_core.help_wrap("where to export logging infos."))
-
-  flags.DEFINE_string(
-      name="benchmark_log_dir",
-      default="./official_logs_bf16/",
-      help=flags_core.help_wrap("where to export logging infos."))
-
   # Deep speech flags
   flags.DEFINE_integer(
       name="seed", default=1,

@@ -120,8 +120,9 @@ def _rnn_layer(inputs, rnn_cell, rnn_hidden_size, layer_id, is_batch_norm,
   # Construct forward/backward RNN cells.
   fw_cell = rnn_cell(num_units=rnn_hidden_size,
                      name="rnn_fw_{}".format(layer_id))
-  bw_cell = rnn_cell(num_units=rnn_hidden_size,
-                     name="rnn_bw_{}".format(layer_id))
+  if is_biderectional:
+    bw_cell = rnn_cell(num_units=rnn_hidden_size,
+                       name="rnn_bw_{}".format(layer_id))
 
   # TODO convert to fp32 for kernel
   inputs = tf.cast(inputs, tf.float32)
@@ -131,7 +132,7 @@ def _rnn_layer(inputs, rnn_cell, rnn_hidden_size, layer_id, is_batch_norm,
         swap_memory=True)
     rnn_outputs = tf.concat(outputs, -1)
   else:
-    rnn_outputs = tf.nn.dynamic_rnn(
+    rnn_outputs, _ = tf.nn.dynamic_rnn(
         fw_cell, inputs, dtype=tf.float32, swap_memory=True)
   rnn_outputs = tf.cast(rnn_outputs, dtype)
 
@@ -164,14 +165,12 @@ class DeepSpeech2(object):
   def __call__(self, inputs, training):
     # Two cnn layers.
     inputs = tf.cast(inputs, self.dtype)
-    # TODO changed (20, 5) padding size to (0, 5)
     inputs = _conv_bn_layer(
-        inputs, padding=(0, 5), filters=_CONV_FILTERS, kernel_size=(41, 11),
+        inputs, padding=(20, 5), filters=_CONV_FILTERS, kernel_size=(41, 11),
         strides=(2, 2), layer_id=1, training=training, dtype=self.dtype)
 
-    # TODO changed (10, 5) padding size to (0, 5)
     inputs = _conv_bn_layer(
-        inputs, padding=(0, 5), filters=_CONV_FILTERS, kernel_size=(21, 11),
+        inputs, padding=(10, 5), filters=_CONV_FILTERS, kernel_size=(21, 11),
         strides=(2, 1), layer_id=2, training=training, dtype=self.dtype)
 
     # output of conv_layer2 with the shape of

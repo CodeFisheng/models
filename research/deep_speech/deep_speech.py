@@ -320,7 +320,7 @@ def define_deep_speech_flags():
   flags_core.set_defaults(
       model_dir="./model_dir_fp32/",
       export_dir="./deep_speech_saved_model/",
-      train_epochs=10,
+      train_epochs=20,
       batch_size=16,
       hooks="")
 

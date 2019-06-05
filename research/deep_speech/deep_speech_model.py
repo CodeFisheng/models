@@ -82,14 +82,12 @@ def _conv_bn_layer(inputs, padding, filters, kernel_size, strides, layer_id,
   inputs = tf.pad(
       inputs,
       [[0, 0], [padding[0], padding[0]], [padding[1], padding[1]], [0, 0]])
-  inputs = tf.cast(inputs, dtype)
-  # TODO
-  inputs = tf.cast(inputs, tf.float32)
   inputs = tf.layers.conv2d(
       inputs=inputs, filters=filters, kernel_size=kernel_size, strides=strides,
       padding="valid", use_bias=False, activation=tf.nn.relu6,
       name="cnn_{}".format(layer_id))
-  inputs = tf.cast(inputs, dtype)
+  inputs = tf.cast(inputs, self.dtype)
+  inputs = tf.cast(inputs, tf.float32)
   return batch_norm(inputs, training)
 
 
@@ -165,13 +163,18 @@ class DeepSpeech2(object):
   def __call__(self, inputs, training):
     # Two cnn layers.
     inputs = tf.cast(inputs, self.dtype)
+    inputs = tf.cast(inputs, tf.float32)
     inputs = _conv_bn_layer(
         inputs, padding=(20, 5), filters=_CONV_FILTERS, kernel_size=(41, 11),
         strides=(2, 2), layer_id=1, training=training, dtype=self.dtype)
+    inputs = tf.cast(inputs, self.dtype)
 
+    inputs = tf.cast(inputs, tf.float32)
     inputs = _conv_bn_layer(
         inputs, padding=(10, 5), filters=_CONV_FILTERS, kernel_size=(21, 11),
         strides=(2, 1), layer_id=2, training=training, dtype=self.dtype)
+    inputs = tf.cast(inputs, self.dtype)
+
 
     # output of conv_layer2 with the shape of
     # [batch_size (N), times (T), features (F), channels (C)].
@@ -188,10 +191,12 @@ class DeepSpeech2(object):
     rnn_cell = SUPPORTED_RNNS[self.rnn_type]
     for layer_counter in xrange(self.num_rnn_layers):
       # No batch normalization on the first layer.
+      inputs = tf.cast(inputs, tf.float32)
       is_batch_norm = (layer_counter != 0)
       inputs = _rnn_layer(
           inputs, rnn_cell, self.rnn_hidden_size, layer_counter + 1,
           is_batch_norm, self.is_bidirectional, training, dtype=self.dtype)
+      inputs = tf.cast(inputs, self.dtype)
 
     # FC layer with batch norm.
     inputs = tf.cast(inputs, tf.float32)

@@ -181,6 +181,7 @@ def model_fn(features, labels, mode, params):
   loss = tf.reduce_mean(ctc_loss(
       label_length, ctc_input_length, labels, probs))
 
+  #optimizer = tf.train.MomentumOptimizer(learning_rate=flags_obj.learning_rate, use_nesterov=True, momentum=0.9)
   optimizer = tf.train.AdamOptimizer(learning_rate=flags_obj.learning_rate)
   global_step = tf.train.get_or_create_global_step()
   minimize_op = optimizer.minimize(loss, global_step=global_step)
@@ -320,7 +321,7 @@ def define_deep_speech_flags():
   flags_core.set_defaults(
       model_dir="./model_dir_fp32/",
       export_dir="./deep_speech_saved_model/",
-      train_epochs=20,
+      train_epochs=10,
       batch_size=16,
       hooks="")
 

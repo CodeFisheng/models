@@ -2,7 +2,7 @@
 # Script to run deep speech model to achieve the MLPerf target (WER = 0.23)
 # Step 1: download the LibriSpeech dataset.
 echo "Data downloading..."
-python data/download.py
+#python data/download.py
 model_dir="./model_dir/"
 
 ## After data downloading, the dataset directories are:

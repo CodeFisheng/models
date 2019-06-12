@@ -182,9 +182,16 @@ def model_fn(features, labels, mode, params):
       label_length, ctc_input_length, labels, probs))
 
   #optimizer = tf.train.MomentumOptimizer(learning_rate=flags_obj.learning_rate, use_nesterov=True, momentum=0.9)
+  # TODO add gradients clipping for reemerge paper effect of DS2
+  tvars = tf.trainable_variables()
+  grads, _ = tf.clip_by_global_norm(tf.gradients(loss, tvars), 400)
   optimizer = tf.train.AdamOptimizer(learning_rate=flags_obj.learning_rate)
   global_step = tf.train.get_or_create_global_step()
-  minimize_op = optimizer.minimize(loss, global_step=global_step)
+
+  # TODO replace simple minimize with apply gradients api, and clipped grads
+  # minimize_op = optimizer.minimize(loss, global_step=global_step)
+  minimize_op = optimizer.apply_gradients(zip(grads, trainable_variables))
+
   update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
   # Create the train_op that groups both minimize_ops and update_ops
   train_op = tf.group(minimize_op, update_ops)

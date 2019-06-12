@@ -181,16 +181,20 @@ def model_fn(features, labels, mode, params):
   loss = tf.reduce_mean(ctc_loss(
       label_length, ctc_input_length, labels, probs))
 
+  global_step = tf.train.get_or_create_global_step()
+  # TODO learning rate decay
+  decay_learning_rate = tf.train.exponential_decay(flags_obj.learning_rate, global_step, 175, 0.90, staircase=True) 
   #optimizer = tf.train.MomentumOptimizer(learning_rate=flags_obj.learning_rate, use_nesterov=True, momentum=0.9)
   # TODO add gradients clipping for reemerge paper effect of DS2
-  tvars = tf.trainable_variables()
-  grads, _ = tf.clip_by_global_norm(tf.gradients(loss, tvars), 400)
-  optimizer = tf.train.AdamOptimizer(learning_rate=flags_obj.learning_rate)
-  global_step = tf.train.get_or_create_global_step()
+  #tvars = tf.trainable_variables()
+  #grads, _ = tf.clip_by_global_norm(tf.gradients(loss, tvars), 400)
+  # TODO replace learning rate with decayed learning rate
+  #optimizer = tf.train.AdamOptimizer(learning_rate=flags_obj.learning_rate)
+  optimizer = tf.train.AdamOptimizer(learning_rate=decay_learning_rate)
 
   # TODO replace simple minimize with apply gradients api, and clipped grads
-  # minimize_op = optimizer.minimize(loss, global_step=global_step)
-  minimize_op = optimizer.apply_gradients(zip(grads, trainable_variables))
+  minimize_op = optimizer.minimize(loss, global_step=global_step)
+  # minimize_op = optimizer.apply_gradients(zip(grads, tvars), global_step=global_step)
 
   update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
   # Create the train_op that groups both minimize_ops and update_ops

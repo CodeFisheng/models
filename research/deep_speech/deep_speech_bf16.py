@@ -184,7 +184,7 @@ def model_fn(features, labels, mode, params):
       label_length, ctc_input_length, labels, probs))
 
   global_step = tf.train.get_or_create_global_step()
-  decay_learning_rate = tf.train.exponential_decay(flags_obj.learning_rate, global_step, 175, 0.90, staircase=True)
+  decay_learning_rate = tf.train.exponential_decay(flags_obj.learning_rate, global_step, 1750, 0.90, staircase=True)
   optimizer = tf.train.AdamOptimizer(learning_rate=decay_learning_rate)
   minimize_op = optimizer.minimize(loss, global_step=global_step)
   update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)

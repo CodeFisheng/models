@@ -183,7 +183,7 @@ def model_fn(features, labels, mode, params):
 
   global_step = tf.train.get_or_create_global_step()
   # TODO learning rate decay
-  decay_learning_rate = tf.train.exponential_decay(flags_obj.learning_rate, global_step, 175, 0.90, staircase=True) 
+  decay_learning_rate = tf.train.exponential_decay(flags_obj.learning_rate, global_step, 1750, 0.90, staircase=True)
   #optimizer = tf.train.MomentumOptimizer(learning_rate=flags_obj.learning_rate, use_nesterov=True, momentum=0.9)
   # TODO add gradients clipping for reemerge paper effect of DS2
   #tvars = tf.trainable_variables()
